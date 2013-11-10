@@ -14,7 +14,7 @@ Simple Example
 		a = statdns.domain("statdns.net").getHostAddress();  // sets active domain for inquiries and invokes a method
 		b = statdns.getCanonicalName(); // continues executing against the previously specified domain
 		 
-		c = statdns.domain("").getMX(); // sets a new domain and invokes a method 
+		c = statdns.domain("whitehouse.gov").getMX(); // sets a new domain and invokes a method 
 		d = statdns.getNS(); // executes the newly set domain 
 	</cfscript>
 
