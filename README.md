@@ -22,13 +22,14 @@ Simple Example
 Methods
 -------
 
-Initialization methods:
+__Initialization methods:__
 
 * init() - initializes the component
 	*	domain (optional) - string - if specified, sets the active domain against which subsequent methods will be invoked
 	*	ipv4 (optional) - string - if specified, sets the active IPV4 address against which subsequent methods will be invoked
 	*	ipv6 (optional) - string - if specified, sets the active IPV6 address against which subsequent methods will be invoked
 	*	arpa (optional) - string - if specified, sets the active ARPA address against which subsequent methods will be invoked 
+	*	httptimeout (optional) - numeric - if specified, overrides the default of 60 seconds timeout when making API calls
 	
 * domain() - sets the active domain against which methods are invoked
 	*	domain (required) - string - a valid domain name without protocol or path; note that some methods return different information
@@ -48,66 +49,95 @@ Initialization methods:
 	*	Throws exception if domain value cannot be reliably determined to be a valid format
 	
 	
-Data retrieval methods:
+__Data retrieval methods:__
 
 Note that both terse and verbose method names are available and may be used; you may prefer one or the other for either brevity or readability.
 Invoking these methods without previously setting the data they require, domain(), ipv4(), etc., will throw an exception.
 
-* getA() - getHostAddress() - gets Host Address data for the current domain
+* getA() - getHostAddress() - gets Host Address data for the current _domain_
 	* type (optional) - string - ipv4 / ipv6 - specifies the type of IP data to return; defaults to ipv4
+
 	
-* getCERT() - getCertificate() - gets Certificate data for the current domain
+* getCERT() - getCertificate() - gets Certificate data for the current _domain_
 
-* getCNAME() - getCanonicalName() - gets Canonical Name data for the current domain
 
-* getDHCPID() - getDHCPIdentifier() - gets DHCP Identifier data for the current domain
+* getCNAME() - getCanonicalName() - gets Canonical Name data for the current _domain_
 
-* getDLV() - getDNSSECLookasideValidation() - gets DNSSEC Lookaside Validation data for the current domain
 
-* getDNAME() - getDelegationName() - gets Delegation Name data for the current domain
+* getDHCPID() - getDHCPIdentifier() - gets DHCP Identifier data for the current _domain_
 
-* getDS() - getDelegationSigner() - gets Delegation Signer data for the current domain
 
-* getHINFO() - getHostInformation() - gets Host Information data for the current domain
+* getDLV() - getDNSSECLookasideValidation() - gets DNSSEC Lookaside Validation data for the current _domain_
 
-* getHIP() - getHostIdentityProtocol() - gets Host Identifiy Protocol data for the current domain
 
-* getKX() - getKeyExchanger() - gets Key Exchanger data for the current domain
+* getDNAME() - getDelegationName() - gets Delegation Name data for the current _domain_
 
-* getLOC() - getLocation() - gets Location data for the current domain
 
-* getMX() - getMailExchange() - gets Mail Exchange data for the current domain
+* getDS() - getDelegationSigner() - gets Delegation Signer data for the current _domain_
 
-* getNAPTR() - getNameAuthorityPointer() - get Name Authority Pointer data for the current domain
 
-* getNS() - getNameServers() - gets Name Servers data for the current domain
+* getHINFO() - getHostInformation() - gets Host Information data for the current _domain_
 
-* getNSEC() - getNextSecure() - gets Next-Secure data for the current domain
 
-* getNSEC3() - getNextSecureV3() - gets Next-Secure v3 data for the current domain
+* getHIP() - getHostIdentityProtocol() - gets Host Identifiy Protocol data for the current _domain_
 
-* getNSEC3Param() - getNextSecureV3Parameters() - gets Next-Secure v3 Parameters data for the current domain
 
-* getOPT() - getOption() - gets Option data for the current domain
+* getKX() - getKeyExchanger() - gets Key Exchanger data for the current _domain_
 
-* getPTR() - getPointer() - gets Pointer data for the current ARPA address
 
-* getRRSIG() - getResourceRecordsSignature() - gets Resource Records Signature data for the current domain
+* getLOC() - getLocation() - gets Location data for the current _domain_
 
-* getSOA() - getStartOfAuthority() - gets Start of Authority data for the current domain
 
-* getSPF() - getSenderPolicyFramework() - gets Sender Policy Framework data for the current domain
+* getMX() - getMailExchange() - gets Mail Exchange data for the current _domain_
 
-* getSRV() - getServiceLocator() - gets Service Locator data for the current domain
 
-* getSSHFP() - getSSHPublicKeyFingerprint() - gets SSH Public Key Fingerprint data for the current domain
+* getNAPTR() - getNameAuthorityPointer() - get Name Authority Pointer data for the current _domain_
 
-* getTA() - getTrustAuthorities() - getDNSSECTrustAuthorities() - gets DNSSEC Trust Authorities data for the current domain
 
-* getTALINK() - getTrustAnchorLink() - gets Trust Anchor LINK data for the current domain
+* getNS() - getNameServers() - gets Name Servers data for the current _domain_
 
-* getTXT() - getText() - getTextRecord() - gets Text record data for the current domain
 
-* getRPTR() - getReversePointer() - gets Reverse Pointer data for the current ipv4 or ipv6 address
+* getNSEC() - getNextSecure() - gets Next-Secure data for the current _domain_
+
+
+* getNSEC3() - getNextSecureV3() - gets Next-Secure v3 data for the current _domain_
+
+
+* getNSEC3Param() - getNextSecureV3Parameters() - gets Next-Secure v3 Parameters data for the current _domain_
+
+
+* getOPT() - getOption() - gets Option data for the current _domain_
+
+
+* getPTR() - getPointer() - gets Pointer data for the current _ARPA_ address
+
+
+* getRRSIG() - getResourceRecordsSignature() - gets Resource Records Signature data for the current _domain_
+
+
+* getSOA() - getStartOfAuthority() - gets Start of Authority data for the current _domain_
+
+
+* getSPF() - getSenderPolicyFramework() - gets Sender Policy Framework data for the current _domain_
+
+
+* getSRV() - getServiceLocator() - gets Service Locator data for the current _domain_
+
+
+* getSSHFP() - getSSHPublicKeyFingerprint() - gets SSH Public Key Fingerprint data for the current _domain_
+
+
+* getTA() - getTrustAuthorities() - getDNSSECTrustAuthorities() - gets DNSSEC Trust Authorities data for the current _domain_
+
+
+* getTALINK() - getTrustAnchorLink() - gets Trust Anchor LINK data for the current _domain_
+
+
+* getTXT() - getText() - getTextRecord() - gets Text record data for the current _domain_
+
+
+* getRPTR() - getReversePointer() - gets Reverse Pointer data for the current _ipv4 or ipv6_ address
 	* type (optional) - string - ipv4 / ipv6 - specifies the type of IP data being passed; defaults to ipv4
+
+	
 
