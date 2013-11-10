@@ -11,10 +11,17 @@ Simple Example
 		statdns = createobject("component","StatDNSConsumer").init();
 		
 		// note that both verbose and short method names are used below
-		a = statdns.domain("statdns.net").getHostAddress();  // sets active domain for inquiries and invokes a method
+		a = statdns.domain("www.whitehouse.gov").getHostAddress();  // sets active domain for inquiries and invokes a method
 		b = statdns.getCanonicalName(); // continues executing against the previously specified domain
+		
+		writeOutput("Host Address: " & a.result & "<br />"); // outputs simplified results in a comma-separated list
+		writeOutput("Canonical Name: " & b.result & "<br />"); // outputs simplified results in a comma-separated list
+		writeOutput("<hr />Full response for Host Address, note that only those result types matching the original inquiry (A records) are included in the simplified 'result' value:<br />");
+		for(r in a.results) { // alternatively, you may loop the results array for more verbose info
+			writeDump(r);
+		}
 		 
-		c = statdns.domain("whitehouse.gov").getMX(); // sets a new domain and invokes a method 
+		c = statdns.domain("statdns.net").getMX(); // sets a new domain and invokes a method 
 		d = statdns.getNS(); // executes the newly set domain 
 	</cfscript>
 
