@@ -31,10 +31,10 @@
 			
 			if(structkeyexists(arguments,"ip")) { // attempt auto-detect if arbitrary ip is passed 
 				if(isIPv4(arguments,ip)) { 
-					arguments.ipv4 = arguments.ip;
+					ipv4(arguments.ip);
 				}
 				else if(isIPv6(arguments.ip)) { 
-					arguments.ipv6 = arguments.ip;
+					ipv6( arguments.ip);
 				}
 			}
 	
