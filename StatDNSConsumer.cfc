@@ -568,7 +568,7 @@
 			var h = arguments.httpresponse; 
 			var response = {
 					inquiry = {
-						value = "",
+						name = "",
 						type = "",
 						class = ""
 					},

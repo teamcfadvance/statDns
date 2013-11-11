@@ -10,141 +10,361 @@ Simple Example
 		// instantiate component
 		statdns = createobject("component","StatDNSConsumer").init();
 		
-		// note that both verbose and short method names are used below
+		// verbose method name example
 		a = statdns.domain("www.whitehouse.gov").getHostAddress();  // sets active domain for inquiries and invokes a method
 		b = statdns.getCanonicalName(); // continues executing against the previously specified domain
 		
 		writeOutput("Host Address: " & a.result & "<br />"); // outputs simplified results in a comma-separated list
 		writeOutput("Canonical Name: " & b.result & "<br />"); // outputs simplified results in a comma-separated list
-		writeOutput("<hr />Full response for Host Address, note that only those result types matching the original inquiry (A records) are included in the simplified 'result' value:<br />");
-		for(r in a.results) { // alternatively, you may loop the results array for more verbose info
-			writeDump(r);
+		
+		// note that only those result types matching the original inquiry (A records) 
+		// are included in the simplified 'result' value above; full results may be looped below for more verbose info
+		writeOutput("Full Results:<br />");
+		if(arraylen(a.results)) {
+			for(r in a.results) { 
+				writeDump(r);
+			}
 		}
 		 
+		// terse method name example
 		c = statdns.domain("statdns.net").getMX(); // sets a new domain and invokes a method 
 		d = statdns.getNS(); // executes the newly set domain 
 	</cfscript>
+	
+	
+Response Format
+---------------
+Response is a standardized struct containing the following keys:
 
+	response = {
+			inquiry = { // an echo of the request being processed
+				name = "", // typically the domain or ip value for which info is being retrieved
+				type = "", // the type of record data requested; this is used when determining how to build the 'result' key below
+				class = "" 
+			},
+			result = "", // convenience value; comma-delimited list of result data values which specifically match the query type
+			results = [], // array of raw results
+			authoritative = [], // array of entities acting as authoritative sources for the returned data
+			timestamp = "", // timestamp of the request
+			success = false, // whether the data request was successful; requests which will result in NO data will have this flag set false
+			errors = "" // any errors which may have occurred during the call; when response.success key is false, this string will be relevant
+	};	
+
+A valid response to getHostAddress with its result formatted as JSON (for display purposes) - notice how only those results whose type matched 
+the inquiry type will be included in the simplified 'result' value:
+
+	{
+		"inquiry" : {
+			"name" : "www.whitehouse.gov.",
+			"class" : "IN",
+			"type" : "A"
+		},
+		"result" : "92.122.189.80,92.122.189.59",
+		"results" : [{
+				"name" : "www.whitehouse.gov.",
+				"data" : "www.whitehouse.gov.edgesuite.net.",
+				"datalength" : 34,
+				"class" : "IN",
+				"ttl" : 3527,
+				"type" : "CNAME"
+			}, {
+				"name" : "www.whitehouse.gov.edgesuite.net.",
+				"data" : "www.eop-edge-lb.akadns.net.",
+				"datalength" : 25,
+				"class" : "IN",
+				"ttl" : 827,
+				"type" : "CNAME"
+			}, {
+				"name" : "www.eop-edge-lb.akadns.net.",
+				"data" : "a1128.dsch.akamai.net.",
+				"datalength" : 20,
+				"class" : "IN",
+				"ttl" : 227,
+				"type" : "CNAME"
+			}, {
+				"name" : "a1128.dsch.akamai.net.",
+				"data" : "92.122.189.80",
+				"datalength" : 4,
+				"class" : "IN",
+				"ttl" : 20,
+				"type" : "A"
+			}, {
+				"name" : "a1128.dsch.akamai.net.",
+				"data" : "92.122.189.59",
+				"datalength" : 4,
+				"class" : "IN",
+				"ttl" : 20,
+				"type" : "A"
+			}
+		],
+		"authoritative" : [],
+		"success" : true,
+		"errors" : "",
+		"timestamp" : "November, 10 2013 21:03:10 -0600"
+	}
+	
 
 Methods
 -------
 
-__Initialization methods:__
+__Initialization methods:__  
+The following set of methods are chainable, returning the StatDNSConsumer component itself.  
 
-* init() - initializes the component
-	*	domain (optional) - string - if specified, sets the active domain against which subsequent methods will be invoked
-	*	ipv4 (optional) - string - if specified, sets the active IPV4 address against which subsequent methods will be invoked
-	*	ipv6 (optional) - string - if specified, sets the active IPV6 address against which subsequent methods will be invoked
-	*	arpa (optional) - string - if specified, sets the active ARPA address against which subsequent methods will be invoked 
-	*	httptimeout (optional) - numeric - if specified, overrides the default of 60 seconds timeout when making API calls
+	Example:	
+		statdns = createobject("component","StatDNSConsumer").init(); // instantiate component
+		
+		statdns.domain("www.whitehouse.gov"); // set domain to query
+		a = statdns.getHostAddress(); // get A record data
+		
+		// alternatively, may be chained as:		
+		a = statdns.domain("www.whitehouse.gov").getHostAddress();
+		
+
+* __init()__ - initializes the component
+>	*	Arguments
+>		*	domain (optional) - string - if specified, sets the active domain against which subsequent methods will be invoked
+>		*	ipv4 (optional) - string - if specified, sets the active IPV4 address against which subsequent methods will be invoked
+>		*	ipv6 (optional) - string - if specified, sets the active IPV6 address against which subsequent methods will be invoked
+>		*	arpa (optional) - string - if specified, sets the active ARPA address against which subsequent methods will be invoked 
+>		*	httptimeout (optional) - numeric - if specified, overrides the default of 60 seconds timeout when making API calls
+>	*	Returns
+>		*	StatDNSConsumer (this) - _chainable_
 	
-* domain() - sets the active domain against which methods are invoked
-	*	domain (required) - string - a valid domain name without protocol or path; note that some methods return different information
-		depending on the nature of the domain name; e.g., www.statdns.net may return different information than statdns.net
-	*	Throws exception if domain value cannot be reliably determined to be a valid format
+* __domain()__ - sets the active domain against which methods are invoked
+>	*	Arguments
+>		*	domain (required) - string - a valid domain name without protocol or path; note that some methods return different information
+>			depending on the nature of the domain name; e.g., www.statdns.net may return different information than statdns.net
+>	*	Returns
+>		*	StatDNSConsumer (this) - _chainable_
+>	*	Throws
+>		*	InvalidDomain exception if domain value cannot be reliably determined to be a valid format
 
-* ipv4() - sets the active IPV4 address against which methods are invoked
-	*	ipv4 (required) - string - a valid IPV4 address
-	*	Throws exception if domain value cannot be reliably determined to be a valid format
+* __ipv4()__ - sets the active IPV4 address against which methods are invoked
+>	*	Arguments
+>		*	ipv4 (required) - string - a valid IPV4 address
+>	*	Returns
+>		*	StatDNSConsumer (this) - _chainable_
+>	*	Throws
+>		*	InvalidIPv4 exception if ipv4 value cannot be reliably determined to be a valid format
 
-* ipv6() - sets the active IPV6 address against which methods are invoked
-	*	ipv6 (required) - string - a valid IPV6 address
-	*	Throws exception if domain value cannot be reliably determined to be a valid format
+* __ipv6()__ - sets the active IPV6 address against which methods are invoked
+>	*	Arguments
+>		*	ipv6 (required) - string - a valid IPV6 address
+>	*	Returns
+>		*	StatDNSConsumer (this) - _chainable_
+>	*	Throws
+>		*	InvalidIPv4 exception if ipv6 value cannot be reliably determined to be a valid format
 
-* arpa() - sets the active ARPA address against which methods are invoked
-	*	arpa (required) - string - a valid ARPA address
-	*	Throws exception if domain value cannot be reliably determined to be a valid format
+* __arpa()__ - sets the active ARPA address against which methods are invoked
+>	*	Arguments
+>		*	arpa (required) - string - a valid ARPA address
+>	*	Returns
+>		*	StatDNSConsumer (this) - _chainable_
+>	*	Throws
+>		*	InvalidARPA exception if arpa value is empty string (no additional validation at this time)
 	
-	
+
 __Data retrieval methods:__
 
 Note that both terse and verbose method names are available and may be used; you may prefer one or the other for either brevity or readability.
 Invoking these methods without previously setting the data they require, domain(), ipv4(), etc., will throw an exception.
 
-* getA() - getHostAddress() - gets Host Address data for the current _domain_
-	* type (optional) - string - ipv4 / ipv6 - specifies the type of IP data to return; defaults to ipv4
-
+* __getA()__ - __getHostAddress()__ - gets Host Address data for the current _domain_
+>	*	Arguments:
+>		* type (optional) - string - ipv4 / ipv6 - specifies the type of IP data to return; defaults to ipv4
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 	
-* getCERT() - getCertificate() - gets Certificate data for the current _domain_
+* __getCERT()__ - __getCertificate()__ - gets Certificate data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
+
+* __getCNAME()__ - __getCanonicalName()__ - gets Canonical Name data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getCNAME() - getCanonicalName() - gets Canonical Name data for the current _domain_
+* __getDHCPID()__ - __getDHCPIdentifier()__ - gets DHCP Identifier data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getDHCPID() - getDHCPIdentifier() - gets DHCP Identifier data for the current _domain_
+* __getDLV()__ - __getDNSSECLookasideValidation()__ - gets DNSSEC Lookaside Validation data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getDLV() - getDNSSECLookasideValidation() - gets DNSSEC Lookaside Validation data for the current _domain_
+* __getDNAME()__ - __getDelegationName()__ - gets Delegation Name data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getDNAME() - getDelegationName() - gets Delegation Name data for the current _domain_
+* __getDS()__ - __getDelegationSigner()__ - gets Delegation Signer data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getDS() - getDelegationSigner() - gets Delegation Signer data for the current _domain_
+* __getHINFO()__ - __getHostInformation()__ - gets Host Information data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getHINFO() - getHostInformation() - gets Host Information data for the current _domain_
+* __getHIP()__ - __getHostIdentityProtocol()__ - gets Host Identifiy Protocol data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getHIP() - getHostIdentityProtocol() - gets Host Identifiy Protocol data for the current _domain_
+* __getKX()__ - __getKeyExchanger()__ - gets Key Exchanger data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getKX() - getKeyExchanger() - gets Key Exchanger data for the current _domain_
+* __getLOC()__ - __getLocation()__ - gets Location data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getLOC() - getLocation() - gets Location data for the current _domain_
+* __getMX()__ - __getMailExchange()__ - gets Mail Exchange data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getMX() - getMailExchange() - gets Mail Exchange data for the current _domain_
+* __getNAPTR()__ - __getNameAuthorityPointer()__ - get Name Authority Pointer data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getNAPTR() - getNameAuthorityPointer() - get Name Authority Pointer data for the current _domain_
+* __getNS()__ - __getNameServers()__ - gets Name Servers data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getNS() - getNameServers() - gets Name Servers data for the current _domain_
+* __getNSEC()__ - __getNextSecure()__ - gets Next-Secure data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getNSEC() - getNextSecure() - gets Next-Secure data for the current _domain_
+* __getNSEC3()__ - __getNextSecureV3()__ - gets Next-Secure v3 data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getNSEC3() - getNextSecureV3() - gets Next-Secure v3 data for the current _domain_
+* __getNSEC3Param()__ - __getNextSecureV3Parameters()__ - gets Next-Secure v3 Parameters data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getNSEC3Param() - getNextSecureV3Parameters() - gets Next-Secure v3 Parameters data for the current _domain_
+* __getOPT()__ - __getOption()__ - gets Option data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getOPT() - getOption() - gets Option data for the current _domain_
+* __getPTR()__ - __getPointer()__ - gets Pointer data for the current _ARPA_ address
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the arpa() or init() methods
 
 
-* getPTR() - getPointer() - gets Pointer data for the current _ARPA_ address
+* __getRRSIG()__ - __getResourceRecordsSignature()__ - gets Resource Records Signature data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getRRSIG() - getResourceRecordsSignature() - gets Resource Records Signature data for the current _domain_
+* __getSOA()__ - __getStartOfAuthority()__ - gets Start of Authority data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getSOA() - getStartOfAuthority() - gets Start of Authority data for the current _domain_
+* __getSPF()__ - __getSenderPolicyFramework()__ - gets Sender Policy Framework data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getSPF() - getSenderPolicyFramework() - gets Sender Policy Framework data for the current _domain_
+* __getSRV()__ - __getServiceLocator()__ - gets Service Locator data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getSRV() - getServiceLocator() - gets Service Locator data for the current _domain_
+* __getSSHFP()__ - __getSSHPublicKeyFingerprint()__ - gets SSH Public Key Fingerprint data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getSSHFP() - getSSHPublicKeyFingerprint() - gets SSH Public Key Fingerprint data for the current _domain_
+* __getTA()__ - __getTrustAuthorities()__ - __getDNSSECTrustAuthorities()__ - gets DNSSEC Trust Authorities data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getTA() - getTrustAuthorities() - getDNSSECTrustAuthorities() - gets DNSSEC Trust Authorities data for the current _domain_
+* __getTALINK()__ - __getTrustAnchorLink()__ - gets Trust Anchor LINK data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getTALINK() - getTrustAnchorLink() - gets Trust Anchor LINK data for the current _domain_
+* __getTXT()__ - __getText()__ - __getTextRecord()__ - gets Text record data for the current _domain_
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the domain() or init() methods
 
 
-* getTXT() - getText() - getTextRecord() - gets Text record data for the current _domain_
-
-
-* getRPTR() - getReversePointer() - gets Reverse Pointer data for the current _ipv4 or ipv6_ address
-	* type (optional) - string - ipv4 / ipv6 - specifies the type of IP data being passed; defaults to ipv4
+* __getRPTR()__ - __getReversePointer()__ - gets Reverse Pointer data for the current _ipv4 or ipv6_ address
+>	*	Arguments:
+>		* type (optional) - string - ipv4 / ipv6 - specifies the type of IP data being passed; defaults to ipv4
+>	*	Returns
+>		*	standardized response (struct)
+>	*	Throws
+>		*	RequiredValueMissing exception if domain has not been set via the ipv4(), ipv6 or init() methods
 
 	
 
