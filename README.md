@@ -55,7 +55,7 @@ Response is a standardized struct containing the following keys:
 			errors = "" // any errors which may have occurred during the call; when response.success key is false, this string will be relevant
 	};	
 
-A valid response for the domain www.whitehouse.gove from a call to getHostAddress() with its result formatted as JSON (for display purposes) - notice how only those results whose type matched the inquiry type will be included in the simplified 'result' value:
+A valid response for the domain www.whitehouse.gov from a call to getHostAddress() with its result formatted as JSON (for display purposes) - notice how only those results whose type matched the inquiry type will be included in the simplified 'result' value:
 
 	{
 		"inquiry" : {
