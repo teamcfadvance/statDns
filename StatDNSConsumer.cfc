@@ -103,7 +103,7 @@
 		<cfargument name="ipv6" type="string" required="true" hint="A valid IPv6 value">
 		
 		<cfscript>
-			if(not isIPv4(arguments.ipv6)) {
+			if(not isIPv6(arguments.ipv6)) {
 				throw(type="InvalidIPv6",message="The value #arguments.ipv6# is not a valid IPv6address");
 			}
 			variables.instance.ipv6 = arguments.ipv6;
